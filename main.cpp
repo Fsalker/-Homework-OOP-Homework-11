@@ -5,8 +5,6 @@
 #include<algorithm> /// sort
 using namespace std;
 
-ifstream in("data.in");
-
 const bool SUPPRESS_LOGS = 1;
 const bool SUPPRESS_LOGS_SOFT = 1;
 
