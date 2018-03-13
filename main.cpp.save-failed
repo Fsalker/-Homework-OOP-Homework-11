@@ -7,7 +7,7 @@ using namespace std;
 
 ifstream in("data.in");
 
-const bool SUPPRESS_LOGS = 1;
+const bool SUPPRESS_LOGS = 0;
 const bool SUPPRESS_LOGS_SOFT = 1;
 
 class complexNumber{
@@ -100,16 +100,9 @@ class complexNumber{
         }
 };
 
-istream& operator>>(istream& in, complexNumber& nr){
+ifstream& operator>>(ifstream& in, complexNumber nr){
     in>>nr.x>>nr.y;
-}
-
-ostream& operator<<(ostream& out, complexNumber nr){
-    out<<nr.x<<" "<<nr.y<<"\n";
-}
-
-ifstream& operator>>(ifstream& in, complexNumber& nr){
-    in>>nr.x>>nr.y;
+    cout<<"x = "<<nr.x<<", y = "<<nr.y<<"\n";
 }
 
 ofstream& operator<<(ofstream& out, complexNumber nr){
@@ -124,7 +117,7 @@ void unitTest(){
     complexNumber diff(5, -2);
     complexNumber product(-6, 35);
     complexNumber div(3 / (-2.0), 5/7.0);
-    complexNumber c(4, 7);
+    complexNumber copyThis(4, 7);
 
     assert(a.x == 3);
     assert(a.y == 5);
@@ -135,8 +128,8 @@ void unitTest(){
     assert(a-b == diff);
     assert(a*b == product);
     assert(a/b == div);
-    a = c;
-    assert(a == c);
+    a = copyThis;
+    assert(a == copyThis);
 
     complexNumber smallNumber(1, 1);
     complexNumber bigNumber(3, -2);
@@ -148,7 +141,9 @@ void unitTest(){
     ifstream in("test.txt");
     complexNumber a_copy;
     in >> a_copy;
-    assert(a == a_copy);
+    //assert(a == a_copy);
+    a.print();
+    a_copy.print();
 
     if(bool TESTING_DIVISION_BY_ZERO = false){
         complexNumber badDivisionNumber(5, 0);
@@ -165,16 +160,9 @@ int main()
 {
     unitTest();
 
-    /// Cerinta Comuna 1 (citirea informațiilor complete a n obiecte, memorarea și afisarea acestora)
-    complexNumber v[20];
-    int n;
-
-    ifstream in("sortData.in");
-    in>>n;
-    for(int i=0; i<n; ++i) in>>v[i];
-    for(int i=0; i<n; ++i) cout<<v[i]; cout<<"\n"; /// Input data
-    sort(v, v+n);
-    for(int i=0; i<n; ++i) cout<<v[i]; cout<<"\n"; /// Sorted Input data
+    complexNumber a,b;
+    //cin>>a;
+    //cin>>b;
 
     return 0;
 }
