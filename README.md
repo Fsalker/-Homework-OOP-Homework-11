@@ -3,7 +3,7 @@
 
 ## Complex Numbers
 
-##### Features
+#### Features
 - Add (+)
 - Substract (-)
 - Multiply (*)
@@ -14,7 +14,7 @@
 
 ## Algebra Matrix
 
-##### Features
+#### Features
 
 - Add (+)
 - Substract (-)
