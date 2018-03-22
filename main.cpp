@@ -68,7 +68,7 @@ class complexNumber{
 
         complexNumber operator/(complexNumber other){
             if(other.x * other.x + other.y * other.y == 0)
-                throw "Cannot divide by 0.";
+                throw overflow_error("Cannot divide by 0.");
             complexNumber res;
                 res.x = (this->x * other.x + this->y * other.y) / (other.x * other.x + other.y * other.y);
                 res.y = (this->y * other.x - this->x * other.y) / (other.x * other.x + other.y * other.y);;
@@ -116,74 +116,13 @@ class complexNumber{
         }
 };
 
-template<typename T> class matrix{
+class matrix{
     friend class complexNumber;
     private:
     protected:
     public:
         int height, width;
-        T **data;
-
-        matrix(const matrix& other){
-            height = other.height;
-            width = other.width;
-
-            data = new complexNumber*[height];
-            for(int i=0; i<height; ++i)
-            {
-                data[i] = new complexNumber[width];
-                for(int j=0; j<width; ++j)
-                    data[i][j] = other.data[i][j];
-            }
-        }
-
-        matrix(){
-        }
-
-        ~matrix(){
-            for(int i=0; i<this->height; ++i)
-            {
-                //cout<<"i = "<<i<<", height = "<<this->height<<"\n";
-                //cout<<"deleting "<<data[i]<<"\n";
-                //delete &(data[i]);
-
-                //delete[] data[i];
-            }
-            //delete[] data;
-        }
-
-        bool operator==(matrix other){
-            if(height != other.height) return 0;
-            if(width != other.width) return 0;
-
-            for(int i=0; i<height; ++i)
-                for(int j=0; j<width; ++j)
-                    if(data[i][j] != other.data[i][j])
-                        return 0;
-
-            return 1;
-        }
-
-        bool operator!=(matrix other){
-            return !(*this == other);
-        }
-
-        bool operator<(matrix other){
-            return height < other.height;
-        }
-
-        matrix operator=(matrix other){
-            this->height = other.height;
-            this->width = other.width;
-            this->data = new complexNumber*[height];
-            for(int i=0; i<this->height; ++i)
-            {
-                this->data[i] = new complexNumber[width];
-                for(int j=0; j<this->width; ++j)
-                    this->data[i][j] = other.data[i][j];
-            }
-            return *this;
-        }
+        complexNumber **data;
 
         matrix operator+(matrix other){
             matrix res;
@@ -311,53 +250,53 @@ template<typename T> class matrix{
             }
             return res;
         }
-
-        friend istream& operator>>(istream& in, matrix<T>& A){
-            in>>A.height>>A.width;
-            A.data = new complexNumber*[A.height];
-            for(int i=0; i<A.height; ++i)
-            {
-                A.data[i] = new complexNumber[A.width];
-                for(int j=0; j<A.width; ++j)
-                    in>>A.data[i][j];
-            }
-            return in;
-        }
-
-        friend ifstream& operator>>(ifstream& in, matrix<T>& A){
-            in>>A.height>>A.width;
-            A.data = new complexNumber*[A.height];
-            for(int i=0; i<A.height; ++i)
-            {
-                A.data[i] = new complexNumber[A.width];
-                for(int j=0; j<A.width; ++j)
-                    in>>A.data[i][j];
-            }
-            return in;
-        }
-
-        friend ostream& operator<<(ostream& out, matrix<T> A){
-            //out<<A.height<<" "<<A.width<<"\n";
-            for(int i=0; i<A.height; ++i)
-            {
-                for(int j=0; j<A.width; ++j)
-                    out<<A.data[i][j]<<" ";
-                out<<"\n";
-            }
-            return out;
-        }
-
-        friend ofstream& operator<<(ofstream& out, matrix<T> A){
-            //out<<A.height<<" "<<A.width<<"\n";
-            for(int i=0; i<A.height; ++i)
-            {
-                for(int j=0; j<A.width; ++j)
-                    out<<A.data[i][j]<<" ";
-                out<<"\n";
-            }
-            return out;
-        }
 };
+
+
+
+istream& operator>>(istream& in, matrix& A){
+    in>>A.height>>A.width;
+    A.data = new complexNumber*[A.height];
+    for(int i=0; i<A.height; ++i)
+    {
+        A.data[i] = new complexNumber[A.width];
+        for(int j=0; j<A.width; ++j)
+            in>>A.data[i][j];
+    }
+}
+
+ifstream& operator>>(ifstream& in, matrix& A){
+    in>>A.height>>A.width;
+    A.data = new complexNumber*[A.height];
+    for(int i=0; i<A.height; ++i)
+    {
+        A.data[i] = new complexNumber[A.width];
+        for(int j=0; j<A.width; ++j)
+            in>>A.data[i][j];
+    }
+}
+
+ostream& operator<<(ostream& out, matrix A){
+    //out<<A.height<<" "<<A.width<<"\n";
+    for(int i=0; i<A.height; ++i)
+    {
+        for(int j=0; j<A.width; ++j)
+            out<<A.data[i][j]<<" ";
+        out<<"\n";
+    }
+}
+
+ofstream& operator<<(ofstream& out, matrix A){
+    //out<<A.height<<" "<<A.width<<"\n";
+    for(int i=0; i<A.height; ++i)
+    {
+        for(int j=0; j<A.width; ++j)
+            out<<A.data[i][j]<<" ";
+        out<<"\n";
+    }
+}
+
+
 
 void unitTest_complexNumber(){
     complexNumber a(3, 5);
@@ -438,22 +377,14 @@ int main()
     in.close();
 
     /// Task #2
-    matrix<complexNumber> A,B;
+    matrix A,B;
     ifstream in2("homeworkData.in");
     in2>>A;
     in2>>B;
     cout<<"A = \n"; cout<<A; cout<<"\n";
     cout<<"B = \n"; cout<<B; cout<<"\n";
-    matrix<complexNumber> AAA = A;
-    matrix<complexNumber> AAAA(A);
-    cout<<"AAA = \n"; cout<<AAA; cout<<"\n";
-    cout<<"AAAA = \n"; cout<<AAAA; cout<<"\n";
-    assert(A == AAA);
-    assert(A == AAAA);
-    assert( !(A != AAA) );
-    cout<<"Checking A<B: "; cout<< (A<B); cout<<" \n";
     /// + - *
-    matrix<complexNumber> C,D,E;
+    matrix C,D,E;
     C = A+B;
     D = A-B;
     E = A*B;
@@ -466,12 +397,12 @@ int main()
     cout<<"A's Determinant = "; cout<<A.determinant(); cout<<"\n";
 
     /// Inverse
-    matrix<complexNumber> AA;
+    matrix AA;
     AA = A.inverseMatrix();
     cout<<"A's inverse matrix = \n"; cout<<AA; cout<<"\n";
 
     /// A * AA
-    matrix<complexNumber> P;
+    matrix P;
     P = A * AA;
     cout<<"A * AA = \n"; cout<<P; cout<<"\n";
 
