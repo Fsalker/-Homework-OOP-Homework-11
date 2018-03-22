@@ -141,8 +141,8 @@ template<typename T> class matrix{
         }
 
         void clearData(){
-            for(int i=0; i<this->height; ++i) delete[] data[i];
-            delete[] data;
+            // for(int i=0; i<this->height; ++i) delete[] data[i];
+            // delete[] data;
         }
 
         ~matrix(){
