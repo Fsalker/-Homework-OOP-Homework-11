@@ -122,7 +122,7 @@ template<typename T> class matrix{
     protected:
     public:
         int height, width;
-        T **data;
+        T **data = NULL;
 
         matrix(const matrix& other){
             height = other.height;
@@ -141,8 +141,11 @@ template<typename T> class matrix{
         }
 
         void clearData(){
-            // for(int i=0; i<this->height; ++i) delete[] data[i];
-            // delete[] data;
+            if(data){
+                for(int i=0; i<this->height; ++i) delete[] data[i];
+                delete[] data;
+                data = NULL;
+            }
         }
 
         ~matrix(){
