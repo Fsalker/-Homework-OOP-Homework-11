@@ -5,17 +5,19 @@
 #include<algorithm> /// sort
 using namespace std;
 
+ifstream in("data.in");
+
 const bool SUPPRESS_LOGS = 1;
 const bool SUPPRESS_LOGS_SOFT = 1;
 
-template <class T> class complexNumber{
+class complexNumber{
     private:
-        T x,y;
+        double x,y;
     protected:
 
     public:
 
-        complexNumber(T x, T y){
+        complexNumber(double x, double y){
             this->x = x;
             this->y = y;
         }
@@ -66,7 +68,7 @@ template <class T> class complexNumber{
 
         complexNumber operator/(complexNumber other){
             if(other.x * other.x + other.y * other.y == 0)
-                throw overflow_error("Cannot divide by 0.");
+                throw "Cannot divide by 0.";
             complexNumber res;
                 res.x = (this->x * other.x + this->y * other.y) / (other.x * other.x + other.y * other.y);
                 res.y = (this->y * other.x - this->x * other.y) / (other.x * other.x + other.y * other.y);;
@@ -114,23 +116,84 @@ template <class T> class complexNumber{
         }
 };
 
-template <class T> class matrix{
-    friend class complexNumber<T>;
+template<typename T> class matrix{
+    friend class complexNumber;
     private:
     protected:
     public:
         int height, width;
-        complexNumber<T> **data;
+        T **data;
+
+        matrix(const matrix& other){
+            height = other.height;
+            width = other.width;
+
+            data = new complexNumber*[height];
+            for(int i=0; i<height; ++i)
+            {
+                data[i] = new complexNumber[width];
+                for(int j=0; j<width; ++j)
+                    data[i][j] = other.data[i][j];
+            }
+        }
+
+        matrix(){
+        }
+
+        ~matrix(){
+            for(int i=0; i<this->height; ++i)
+            {
+                //cout<<"i = "<<i<<", height = "<<this->height<<"\n";
+                //cout<<"deleting "<<data[i]<<"\n";
+                //delete &(data[i]);
+
+                //delete[] data[i];
+            }
+            //delete[] data;
+        }
+
+        bool operator==(matrix other){
+            if(height != other.height) return 0;
+            if(width != other.width) return 0;
+
+            for(int i=0; i<height; ++i)
+                for(int j=0; j<width; ++j)
+                    if(data[i][j] != other.data[i][j])
+                        return 0;
+
+            return 1;
+        }
+
+        bool operator!=(matrix other){
+            return !(*this == other);
+        }
+
+        bool operator<(matrix other){
+            return height < other.height;
+        }
+
+        matrix operator=(matrix other){
+            this->height = other.height;
+            this->width = other.width;
+            this->data = new complexNumber*[height];
+            for(int i=0; i<this->height; ++i)
+            {
+                this->data[i] = new complexNumber[width];
+                for(int j=0; j<this->width; ++j)
+                    this->data[i][j] = other.data[i][j];
+            }
+            return *this;
+        }
 
         matrix operator+(matrix other){
             matrix res;
 
             res.height = min(height, other.height);
             res.width = min(width, other.width);
-            res.data = new complexNumber<T>*[height];
+            res.data = new complexNumber*[height];
             for(int i=0; i<res.height; ++i)
             {
-                res.data[i] = new complexNumber<T>[width];
+                res.data[i] = new complexNumber[width];
                 for(int j=0; j<res.width; ++j)
                     res.data[i][j] = data[i][j] + other.data[i][j];
             }
@@ -143,10 +206,10 @@ template <class T> class matrix{
 
             res.height = min(height, other.height);
             res.width = min(width, other.width);
-            res.data = new complexNumber<T>*[height];
+            res.data = new complexNumber*[height];
             for(int i=0; i<res.height; ++i)
             {
-                res.data[i] = new complexNumber<T>[width];
+                res.data[i] = new complexNumber[width];
                 for(int j=0; j<res.width; ++j)
                     res.data[i][j] = data[i][j] - other.data[i][j];
             }
@@ -160,13 +223,13 @@ template <class T> class matrix{
 
                 res.height = height;
                 res.width = other.width;
-                res.data = new complexNumber<T>*[height];
+                res.data = new complexNumber*[height];
                 for(int i=0; i<res.height; ++i)
                 {
-                    res.data[i] = new complexNumber<T>[width];
+                    res.data[i] = new complexNumber[width];
                     for(int j=0; j<res.width; ++j)
                     {
-                        res.data[i][j] = *(new complexNumber<T>(0, 0));
+                        res.data[i][j] = *(new complexNumber(0, 0));
                         for(int offset = 0; offset < res.width; ++offset)
                             res.data[i][j] = res.data[i][j] + data[i][offset] * other.data[offset][j];
                     }
@@ -181,12 +244,12 @@ template <class T> class matrix{
 
             smallerMatrix.height = height - 1;
             smallerMatrix.width = width - 1;
-            smallerMatrix.data = new complexNumber<T>*[height-1];
+            smallerMatrix.data = new complexNumber*[height-1];
             int crtSmallRow = 0;
             for(int row = 0; row < height; ++row)
             {
                 if(row == stripRow) continue; /// Skip the row we're currently stripping
-                smallerMatrix.data[crtSmallRow] = new complexNumber<T>[width-1];
+                smallerMatrix.data[crtSmallRow] = new complexNumber[width-1];
                 int crtSmallCol = 0;
                 for(int col=0; col<width; ++col)
                 {
@@ -201,19 +264,19 @@ template <class T> class matrix{
             return smallerMatrix;
         }
 
-        complexNumber<T> determinant(){
+        complexNumber determinant(){
             if(height == width){
                 if(height == 1)
                     return data[0][0];
                 else if(height == 2)
                     return data[0][0] * data[1][1] - data[1][0] * data[0][1];
                 else{
-                    complexNumber<T> res(0, 0);
-                    complexNumber<T> opposite(-1, 0);
+                    complexNumber res(0, 0);
+                    complexNumber opposite(-1, 0);
                     for(int stripCol = 0; stripCol < width; ++stripCol)
                     {
                         matrix smallerMatrix = stripSubmatrix(0, stripCol);
-                        complexNumber<T> crtDeterminant = smallerMatrix.determinant();
+                        complexNumber crtDeterminant = smallerMatrix.determinant();
                         if(stripCol % 2 == 1)
                             crtDeterminant = crtDeterminant * opposite;
                         res = res + data[0][stripCol]*crtDeterminant;
@@ -224,23 +287,23 @@ template <class T> class matrix{
         }
 
         matrix inverseMatrix(){
-            complexNumber<T> det = determinant();
-            complexNumber<T> one(1, 0);
-            complexNumber<T> opposite(-1, 0);
-            complexNumber<T> inverseDeterminant = one / det;
+            complexNumber det = determinant();
+            complexNumber one(1, 0);
+            complexNumber opposite(-1, 0);
+            complexNumber inverseDeterminant = one / det;
 
             matrix res;
             res.height = height;
             res.width = width;
-            res.data = new complexNumber<T>*[height];
+            res.data = new complexNumber*[height];
             for(int row=0; row<height; ++row)
-                res.data[row] = new complexNumber<T>[width];
+                res.data[row] = new complexNumber[width];
             for(int row=0; row<height; ++row)
             {
                 for(int col=0; col<width; ++col)
                 {
                     matrix A_star = stripSubmatrix(row, col);
-                    complexNumber<T> A_star_det = A_star.determinant();
+                    complexNumber A_star_det = A_star.determinant();
                     res.data[col][row] = A_star_det * inverseDeterminant; /// [col][row] for transposition
                     if((col+row)%2 == 1)
                         res.data[col][row] = res.data[col][row] * opposite;
@@ -248,63 +311,63 @@ template <class T> class matrix{
             }
             return res;
         }
+
+        friend istream& operator>>(istream& in, matrix<T>& A){
+            in>>A.height>>A.width;
+            A.data = new complexNumber*[A.height];
+            for(int i=0; i<A.height; ++i)
+            {
+                A.data[i] = new complexNumber[A.width];
+                for(int j=0; j<A.width; ++j)
+                    in>>A.data[i][j];
+            }
+            return in;
+        }
+
+        friend ifstream& operator>>(ifstream& in, matrix<T>& A){
+            in>>A.height>>A.width;
+            A.data = new complexNumber*[A.height];
+            for(int i=0; i<A.height; ++i)
+            {
+                A.data[i] = new complexNumber[A.width];
+                for(int j=0; j<A.width; ++j)
+                    in>>A.data[i][j];
+            }
+            return in;
+        }
+
+        friend ostream& operator<<(ostream& out, matrix<T> A){
+            //out<<A.height<<" "<<A.width<<"\n";
+            for(int i=0; i<A.height; ++i)
+            {
+                for(int j=0; j<A.width; ++j)
+                    out<<A.data[i][j]<<" ";
+                out<<"\n";
+            }
+            return out;
+        }
+
+        friend ofstream& operator<<(ofstream& out, matrix<T> A){
+            //out<<A.height<<" "<<A.width<<"\n";
+            for(int i=0; i<A.height; ++i)
+            {
+                for(int j=0; j<A.width; ++j)
+                    out<<A.data[i][j]<<" ";
+                out<<"\n";
+            }
+            return out;
+        }
 };
 
-
-
-template <typename T> istream& operator>>(istream& in, matrix<T>& A){
-    in>>A.height>>A.width;
-    A.data = new complexNumber<T>*[A.height];
-    for(int i=0; i<A.height; ++i)
-    {
-        A.data[i] = new complexNumber<T>[A.width];
-        for(int j=0; j<A.width; ++j)
-            in>>A.data[i][j];
-    }
-}
-
-template <typename T> ifstream& operator>>(ifstream& in, matrix<T>& A){
-    in>>A.height>>A.width;
-    A.data = new complexNumber<T>*[A.height];
-    for(int i=0; i<A.height; ++i)
-    {
-        A.data[i] = new complexNumber<T>[A.width];
-        for(int j=0; j<A.width; ++j)
-            in>>A.data[i][j];
-    }
-}
-
-template <typename T, typename Y> T& operator<<(T& out, matrix<Y> A){
-    //out<<A.height<<" "<<A.width<<"\n";
-    for(int i=0; i<A.height; ++i)
-    {
-        for(int j=0; j<A.width; ++j)
-            out<<A.data[i][j]<<" ";
-        out<<"\n";
-    }
-}
-
-/*ofstream& operator<<(ofstream& out, matrix A){
-    //out<<A.height<<" "<<A.width<<"\n";
-    for(int i=0; i<A.height; ++i)
-    {
-        for(int j=0; j<A.width; ++j)
-            out<<A.data[i][j]<<" ";
-        out<<"\n";
-    }
-}*/
-
-
-
 void unitTest_complexNumber(){
-    complexNumber<double> a(3, 5);
-    complexNumber<double> b(-2, 7);
-    complexNumber<double> equals(3, 5);
-    complexNumber<double> sum(1, 12);
-    complexNumber<double> diff(5, -2);
-    complexNumber<double> product(-41, 11);
-    complexNumber<double> div(29 / 53.0, -31 / 53.0);
-    complexNumber<double> c(4, 7);
+    complexNumber a(3, 5);
+    complexNumber b(-2, 7);
+    complexNumber equals(3, 5);
+    complexNumber sum(1, 12);
+    complexNumber diff(5, -2);
+    complexNumber product(-41, 11);
+    complexNumber div(29 / 53.0, -31 / 53.0);
+    complexNumber c(4, 7);
 
     //assert(a.x == 3);
     //assert(a.y == 5);
@@ -318,21 +381,21 @@ void unitTest_complexNumber(){
     a = c;
     assert(a == c);
 
-    complexNumber<double> smallNumber(1, 1);
-    complexNumber<double> bigNumber(3, -2);
+    complexNumber smallNumber(1, 1);
+    complexNumber bigNumber(3, -2);
     assert(smallNumber < bigNumber);
 
     ofstream out("test.txt");
     out << a;
     out.close();
     ifstream in("test.txt");
-    complexNumber<double> a_copy;
+    complexNumber a_copy;
     in >> a_copy;
     assert(a == a_copy);
 
     if(bool TESTING_DIVISION_BY_ZERO = false){
-        complexNumber<double> badDivisionNumber(5, 0);
-        complexNumber<double> x = a / badDivisionNumber; ///
+        complexNumber badDivisionNumber(5, 0);
+        complexNumber x = a / badDivisionNumber; ///
     }
 
     if(!SUPPRESS_LOGS){
@@ -361,7 +424,7 @@ int main()
 
     /// Common Task #1 ("citirea informatiilor complete a n obiecte, memorarea si afisarea acestora")
     /// Task #1
-    complexNumber<double> v[20];
+    complexNumber v[20];
     int n;
 
     ifstream in("sortData.in");
@@ -375,14 +438,22 @@ int main()
     in.close();
 
     /// Task #2
-    matrix<double> A,B;
+    matrix<complexNumber> A,B;
     ifstream in2("homeworkData.in");
     in2>>A;
     in2>>B;
     cout<<"A = \n"; cout<<A; cout<<"\n";
     cout<<"B = \n"; cout<<B; cout<<"\n";
+    matrix<complexNumber> AAA = A;
+    matrix<complexNumber> AAAA(A);
+    cout<<"AAA = \n"; cout<<AAA; cout<<"\n";
+    cout<<"AAAA = \n"; cout<<AAAA; cout<<"\n";
+    assert(A == AAA);
+    assert(A == AAAA);
+    assert( !(A != AAA) );
+    cout<<"Checking A<B: "; cout<< (A<B); cout<<" \n";
     /// + - *
-    matrix<double> C,D,E;
+    matrix<complexNumber> C,D,E;
     C = A+B;
     D = A-B;
     E = A*B;
@@ -395,12 +466,12 @@ int main()
     cout<<"A's Determinant = "; cout<<A.determinant(); cout<<"\n";
 
     /// Inverse
-    matrix<double> AA;
+    matrix<complexNumber> AA;
     AA = A.inverseMatrix();
     cout<<"A's inverse matrix = \n"; cout<<AA; cout<<"\n";
 
     /// A * AA
-    matrix<double> P;
+    matrix<complexNumber> P;
     P = A * AA;
     cout<<"A * AA = \n"; cout<<P; cout<<"\n";
 
