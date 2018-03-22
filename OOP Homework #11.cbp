@@ -32,7 +32,11 @@
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 		</Compiler>
+		<Unit filename="homeworkData.in" />
 		<Unit filename="main.cpp" />
+		<Unit filename="matrixTest.in" />
+		<Unit filename="sortData.in" />
+		<Unit filename="test.txt" />
 		<Extensions>
 			<code_completion />
 			<envvars />
