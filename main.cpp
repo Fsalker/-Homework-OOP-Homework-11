@@ -109,10 +109,12 @@ class complexNumber{
 
         friend istream& operator>>(istream& in, complexNumber& nr){
             in>>nr.x>>nr.y;
+            return in;
         }
 
         friend ostream& operator<<(ostream& out, complexNumber nr){
             out<<nr.x<<" "<<nr.y<<" ";
+            return out;
         }
 };
 
@@ -142,7 +144,9 @@ template<typename T> class matrix{
 
         void clearData(){
             if(data){
-                for(int i=0; i<this->height; ++i) delete[] data[i];
+                for(int i=0; i<this->height; ++i)
+                    if(data[i])
+                        delete[] data[i];
                 delete[] data;
                 data = NULL;
             }
@@ -172,7 +176,7 @@ template<typename T> class matrix{
             return height < other.height;
         }
 
-        matrix operator=(const matrix& other){
+        matrix& operator=(const matrix& other){
             this->height = other.height;
             this->width = other.width;
             clearData(); /// No memory leaks :D
@@ -198,7 +202,9 @@ template<typename T> class matrix{
             for(int j=0; j<this->width; ++j)
                 newData[this->height - 1][j] = arr[j];
 
-            delete data;
+            this->height = this->height - 1; /// Avoid SIGSEGV...
+            clearData();
+            this->height = this->height + 1;
             data = newData;
         }
 
@@ -255,6 +261,8 @@ template<typename T> class matrix{
 
                 return res;
             }
+            else
+                throw overflow_error("First Width and Second Height don't match! Cannot multiply matrixes.");
         }
 
         matrix stripSubmatrix(int stripRow, int stripCol){
@@ -331,6 +339,7 @@ template<typename T> class matrix{
         }
 
         friend istream& operator>>(istream& in, matrix<T>& A){
+            A.clearData(); /// [666] Remove this line for less crashes (yes)
             in>>A.height>>A.width;
             A.data = new T*[A.height];
             for(int i=0; i<A.height; ++i)
@@ -412,8 +421,7 @@ void unitTest(){
     //unitTest_matrix();
 }
 
-int main()
-{
+void firstHomework(){
     /// Testing
     unitTest();
 
@@ -477,6 +485,11 @@ int main()
 //    matrix<complexNumber> P;
     P = A * AA;
     cout<<"A * AA = \n"; cout<<P; cout<<"\n";
+}
+
+int main()
+{
+    firstHomework();
 
     return 0;
 }
